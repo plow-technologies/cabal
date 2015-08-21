@@ -1542,6 +1542,7 @@ instance Monoid InstallFlags where
 
 data UploadFlags = UploadFlags {
     uploadCheck       :: Flag Bool,
+    uploadRemoteRepo  :: Flag String,
     uploadUsername    :: Flag Username,
     uploadPassword    :: Flag Password,
     uploadPasswordCmd :: Flag [String],
@@ -1551,6 +1552,7 @@ data UploadFlags = UploadFlags {
 defaultUploadFlags :: UploadFlags
 defaultUploadFlags = UploadFlags {
     uploadCheck       = toFlag False,
+    uploadRemoteRepo  = mempty,
     uploadUsername    = mempty,
     uploadPassword    = mempty,
     uploadPasswordCmd = mempty,
@@ -1576,6 +1578,12 @@ uploadCommand = CommandUI {
         uploadCheck (\v flags -> flags { uploadCheck = v })
         trueArg
 
+      -- maybe Parse.pfail return (parseAbsoluteURI uriStr)
+      ,option ['r'] ["remote-repo"]
+         "Upload package to a private Hackage."
+        uploadRemoteRepo (\v flags -> flags { uploadRemoteRepo = parseURI v })
+        trueArg
+        
       ,option ['u'] ["username"]
         "Hackage username."
         uploadUsername (\v flags -> flags { uploadUsername = v })
@@ -1598,6 +1606,7 @@ uploadCommand = CommandUI {
 instance Monoid UploadFlags where
   mempty = UploadFlags {
     uploadCheck       = mempty,
+    uploadRemoteRepo  = mempty,
     uploadUsername    = mempty,
     uploadPassword    = mempty,
     uploadPasswordCmd = mempty,
@@ -1605,6 +1614,7 @@ instance Monoid UploadFlags where
   }
   mappend a b = UploadFlags {
     uploadCheck       = combine uploadCheck,
+    uploadRemoteRepo  = combine uploadRemoteRepo,
     uploadUsername    = combine uploadUsername,
     uploadPassword    = combine uploadPassword,
     uploadPasswordCmd = combine uploadPasswordCmd,
